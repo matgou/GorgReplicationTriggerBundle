@@ -56,17 +56,21 @@ abstract class TriggerToPdo extends Trigger
     protected function persist($entity) 
     {
         foreach($entity as $query) {
-            $sql  = $query['sql'];
-            $data = $this->cleanParameters($sql, $query['data']);
-            $this->logger->info(sprintf('Execute query : "%s" with data "%s"', $sql, serialize($data)));
-            $sth = $this->pdo->prepare($sql);
-            $sth->execute($data);
-            if($sth->errorCode() === '00000') {
-                $sth->fetch();
-            } else {
-                $errorInfo = $sth->errorInfo();
-                throw new \Exception(sprintf('Exceptition in pdo see log : %s', $errorInfo[2]));
-            }
+            $this->executeQuery($query['sql'], $query['data']);
+        }
+    }
+    
+    protected function executeQuery($sql, Array $data)
+    {
+        $data = $this->cleanParameters($sql, $data);
+        $this->logger->info(sprintf('Execute query : "%s" with data "%s"', $sql, serialize($data)));
+        $sth = $this->pdo->prepare($sql);
+        $sth->execute($data);
+        if($sth->errorCode() === '00000') {
+            return $sth->fetch();
+        } else {
+            $errorInfo = $sth->errorInfo();
+            throw new \Exception(sprintf('Exceptition in pdo see log : %s', $errorInfo[2]));
         }
     }
 }

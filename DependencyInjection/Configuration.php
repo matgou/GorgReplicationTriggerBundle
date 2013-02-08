@@ -38,6 +38,7 @@ class Configuration implements ConfigurationInterface
                         ->scalarNode('event')->end()
                         ->arrayNode('config')
                             ->children()
+                                ->scalarNode('fetch')->end()
                                 ->scalarNode('new')->end()
                                 ->scalarNode('update')->end()
                                 ->scalarNode('remove')->end()

@@ -61,9 +61,19 @@ class TriggerToPdoSingleRaw extends TriggerToPdo
      */
     protected function transform($entity, $action)
     {
+        $data = $this->objectToArray($entity);
+        // Test if entity exist
+        if(strcmp($action, 'new') == 0) {
+            $sql = $this->config['fetch'];
+            $dbData = $this->executeQuery($sql, $data);
+            if(!empty($dbData)) {
+                $action='update';
+            }
+        }
+
         $query = array();
         $query['sql'] = $this->config[$action];
-        $query['data'] = $this->objectToArray($entity);
+        $query['data'] = $data;
         return array($query);
     }
 }
