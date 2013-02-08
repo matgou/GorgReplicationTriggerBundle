@@ -1,0 +1,29 @@
+{
+    "name": "gorg/trigger-bundle",
+    "type": "symfony-bundle",
+    "description": "An Bundle to listen envent and serialize it into other db (for replication use)",
+    "keywords": ["gorg", "pdo", "replication", "trigger"],
+    "license": "GPL",
+    "authors": [
+        {
+            "name": "Mathieu GOULIN",
+            "email": "mathieu.goulin@gadz.org"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.2",
+        "symfony/http-kernel": "2.1.*",
+        "symfony/dependency-injection": "2.1.*",
+        "symfony/framework-bundle": "2.1.*",
+        "symfony/class-loader": "2.1.*",
+        "symfony/yaml": "2.1.*",
+        "symfony/monolog-bundle": "2.1.*",
+    },
+    "autoload": {
+        "psr-0": { "Gorg\\Bundle\\ReplicationTriggerBundle": "" }
+    },
+    "minimum-stability": "dev",
+    "target-dir": "Gorg/Bundle/ReplicationTriggerBundle",
+    "extra": {
+    }
+}
