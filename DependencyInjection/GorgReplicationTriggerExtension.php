@@ -37,11 +37,11 @@ class GorgReplicationTriggerExtension extends Extension
 
         foreach($config['trigger'] as $triggerName => $triggerConfig) {
             $type          = $triggerConfig['type'];
-            $entityManager = $triggerConfig['entityManager'];
             $config        = $triggerConfig['config'];
             $onChange      = $triggerConfig['event'];
 
             if(strcmp($type,"pdoSingleRaw")==0) {
+                $entityManager = $triggerConfig['entityManager'];
                 $def = new Definition(
                     'Gorg\Bundle\ReplicationTriggerBundle\Trigger\TriggerToPdoSingleRaw',
                     array(
@@ -50,9 +50,60 @@ class GorgReplicationTriggerExtension extends Extension
                         $config,
                     )
                 );
+
                 $def->addTag('kernel.event_listener', array('event' => $onChange, 'method' => "onChange"));
+                $container->setDefinition('gorg_replication_trigger_' . $triggerName, $def);
+            } elseif(strcmp($type, "arrayToLdapDiff") == 0) {
+                $def = new Definition(
+                    'Gorg\Bundle\ReplicationTriggerBundle\Trigger\TriggerArrayToLdapDiff',
+                    array(
+                        new Reference('logger'),
+                        new Reference('event_dispatcher'),
+                        new Reference('gorg_ldap_orm.entity_manager'),
+                        $config,
+                    )
+                );
 
+                $def->addTag('kernel.event_listener', array('event' => $onChange, 'method' => "onChange"));
+                $container->setDefinition('gorg_replication_trigger_' . $triggerName, $def);
+            } elseif(strcmp($type, "arrayToProfileLdapDiff") == 0) {
+                $def = new Definition(
+                    'Gorg\Bundle\GramApiServerBundle\Trigger\TriggerArrayToProfileLdapDiff',
+                    array(
+                        new Reference('logger'),
+                        new Reference('event_dispatcher'),
+                        new Reference('gorg_ldap_orm.entity_manager'),
+                        $config,
+                    )
+                );
 
+                $def->addTag('kernel.event_listener', array('event' => $onChange, 'method' => "onChange"));
+                $container->setDefinition('gorg_replication_trigger_' . $triggerName, $def);
+            } elseif(strcmp($type, "pdoKeyToArray") == 0) {
+                $entityManager = $triggerConfig['entityManager'];
+                $def = new Definition(
+                    'Gorg\Bundle\ReplicationTriggerBundle\Trigger\TriggerPdoKeyToArray',
+                    array(
+                        new Reference('logger'),
+                        new Reference('event_dispatcher'),
+                        new Reference('gorg_replication_trigger_pdo_' . $entityManager),
+                        $config,
+                    )
+                );
+
+                $def->addTag('kernel.event_listener', array('event' => $onChange, 'method' => "onChange"));
+                $container->setDefinition('gorg_replication_trigger_' . $triggerName, $def);
+            } elseif(strcmp($type, "forwarder") == 0) {
+                $def = new Definition(
+                    'Gorg\Bundle\ReplicationTriggerBundle\Trigger\TriggerForwarder',
+                    array(
+                        new Reference('logger'),
+                        new Reference('event_dispatcher'),
+                        $config,
+                    )
+                );
+
+                $def->addTag('kernel.event_listener', array('event' => $onChange, 'method' => "onChange"));
                 $container->setDefinition('gorg_replication_trigger_' . $triggerName, $def);
             } else {
                 throw new \Exception(sprintf('The type %s does not exist in trigger builder', $type));
