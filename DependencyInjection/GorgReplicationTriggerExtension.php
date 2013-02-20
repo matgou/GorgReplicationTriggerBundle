@@ -39,6 +39,9 @@ class GorgReplicationTriggerExtension extends Extension
             $type          = $triggerConfig['type'];
             $config        = $triggerConfig['config'];
             $onChange      = $triggerConfig['event'];
+            if(isset($triggerConfig['completer'])) {
+                $completer = $triggerConfig['completer'];
+            }
 
             if(strcmp($type,"pdoSingleRaw")==0) {
                 $entityManager = $triggerConfig['entityManager'];
@@ -53,9 +56,53 @@ class GorgReplicationTriggerExtension extends Extension
 
                 $def->addTag('kernel.event_listener', array('event' => $onChange, 'method' => "onChange"));
                 $container->setDefinition('gorg_replication_trigger_' . $triggerName, $def);
+            }elseif(strcmp($type,"pdoMultiRaw")==0) {
+                $entityManager = $triggerConfig['entityManager'];
+                $def = new Definition(
+                    'Gorg\Bundle\ReplicationTriggerBundle\Trigger\TriggerToPdoMultiRaw',
+                    array(
+                        new Reference('logger'),
+                        new Reference('gorg_replication_trigger_pdo_' . $entityManager),
+                        $config,
+                    )
+                );
+
+                $def->addTag('kernel.event_listener', array('event' => $onChange, 'method' => "onChange"));
+            } elseif(strcmp($type, "emailActivator") == 0) {
+                $def = new Definition(
+                    'Gorg\Bundle\GramApiServerBundle\Trigger\TriggerActiveEmail',
+                    array(
+                        new Reference('logger'),
+                        new Reference('event_dispatcher'),
+                        new Reference('gorg_ldap_orm.entity_manager'),
+                        $config,
+                    )
+                );
+
+                $def->addTag('kernel.event_listener', array('event' => $onChange, 'method' => "onChange"));
+                $container->setDefinition('gorg_replication_trigger_' . $triggerName, $def);
             } elseif(strcmp($type, "arrayToLdapDiff") == 0) {
                 $def = new Definition(
                     'Gorg\Bundle\ReplicationTriggerBundle\Trigger\TriggerArrayToLdapDiff',
+                    array(
+                        new Reference('logger'),
+                        new Reference('event_dispatcher'),
+                        new Reference('gorg_ldap_orm.entity_manager'),
+                        $config,
+                    )
+                );
+
+                $def->addTag('kernel.event_listener', array('event' => $onChange, 'method' => "onChange"));
+                $definitionInContainer = $container->setDefinition('gorg_replication_trigger_' . $triggerName, $def);
+                if(isset($completer)) {
+                    $definitionInContainer->addMethodCall('setCompleter', array(
+                              new Reference($completer)
+                          ));
+                }
+
+            } elseif(strcmp($type, "completeArrayWithLdap") == 0) {
+                $def = new Definition(
+                    'Gorg\Bundle\ReplicationTriggerBundle\Trigger\TriggerCompleteArrayWithLdap',
                     array(
                         new Reference('logger'),
                         new Reference('event_dispatcher'),
@@ -77,8 +124,14 @@ class GorgReplicationTriggerExtension extends Extension
                     )
                 );
 
+
                 $def->addTag('kernel.event_listener', array('event' => $onChange, 'method' => "onChange"));
-                $container->setDefinition('gorg_replication_trigger_' . $triggerName, $def);
+                $definitionInContainer = $container->setDefinition('gorg_replication_trigger_' . $triggerName, $def);
+                if(isset($completer)) {
+                    $definitionInContainer->addMethodCall('setCompleter', array(
+                              new Reference($completer)
+                          ));
+                }
             } elseif(strcmp($type, "pdoKeyToArray") == 0) {
                 $entityManager = $triggerConfig['entityManager'];
                 $def = new Definition(

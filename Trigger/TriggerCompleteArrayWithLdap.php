@@ -29,15 +29,9 @@ use Gorg\Bundle\LdapOrmBundle\Ldap\LdapEntityManager;
  * Class to represent a Trigger
  * Author: Mathieu GOULIN <mathieu.goulin@gadz.org>
  */
-class TriggerArrayToLdapDiff extends TriggerForwarder
+class TriggerCompleteArrayWithLdap extends TriggerForwarder
 {
     protected $entityManager;
-    protected $completer = false;
-
-    public function setCompleter($completer)
-    {
-        $this->completer = $completer;
-    }
 
     /**
      * Create a new trigger
@@ -60,36 +54,22 @@ class TriggerArrayToLdapDiff extends TriggerForwarder
      */
     protected function transform($entity, $action)
     {
+       $this->logger->info(sprintf('complet array : %s', serialize($entity)));
        $repository = $this->entityManager->getRepository($this->config['class']);
-       $new = false;
        $className = $this->config['class'];
        $keyAttribute = $this->config['key'];
-       if(isset($entity[$keyAttribute])) {
-           $ldapEntity = $repository->findOneBy($keyAttribute, $entity[$keyAttribute]);
-       } else {
-           $ldapEntity = null;
-       }
+       $ldapEntity = $repository->findOneBy($keyAttribute, $entity[$keyAttribute]);
        if(!$ldapEntity) {
-           $ldapEntity = new $className();
-           $new = true;
-       }
-       foreach($this->config['mapping'] as $outKey => $inKey) {
-           $setter = 'set' . ucfirst($outKey);
-           if(isset($entity[$inKey])) {
-               $value = $entity[$inKey];
-               if(!is_array($value) && preg_match("@^(19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])@", $value)) {
-                   $value = new \DateTime($value);
-               }
-
-               $ldapEntity->$setter($value);
-           }
+           $this->logger->info(sprintf('Unable to complete array beacause no entity with key %s as value %s', $keyAttribute, $entity[$keyAttribute]));
+           return $entity;
        }
 
-       if($new && $this->completer) {
-           $this->completer->complete($ldapEntity);
+       foreach($this->config['mapping'] as $ldapKey => $arrayKey) {
+           $getter = 'get' . ucfirst($ldapKey);
+           $entity[$arrayKey] = $ldapEntity->$getter();
        }
 
-       return $ldapEntity;
+       return $entity;
     }
 
     /**
@@ -97,12 +77,9 @@ class TriggerArrayToLdapDiff extends TriggerForwarder
      */
     protected function persist($entity)
     {
-        $this->entityManager->persist($entity);
         $event = new TriggerEvent($entity, 'new');
         foreach($this->config['target'] as $forwardEventName) {
             $this->eventDispatcher->dispatch($forwardEventName, $event);
         }
-        return $event;
-
     }
 }
