@@ -68,6 +68,7 @@ class GorgReplicationTriggerExtension extends Extension
                 );
 
                 $def->addTag('kernel.event_listener', array('event' => $onChange, 'method' => "onChange"));
+                $container->setDefinition('gorg_replication_trigger_' . $triggerName, $def);
             } elseif(strcmp($type, "emailActivator") == 0) {
                 $def = new Definition(
                     'Gorg\Bundle\GramApiServerBundle\Trigger\TriggerActiveEmail',
