@@ -49,6 +49,7 @@ class GorgReplicationTriggerExtension extends Extension
                     'Gorg\Bundle\ReplicationTriggerBundle\Trigger\TriggerToPdoSingleRaw',
                     array(
                         new Reference('logger'),
+                        new Reference('event_dispatcher'),
                         new Reference('gorg_replication_trigger_pdo_' . $entityManager),
                         $config,
                     )
@@ -62,6 +63,7 @@ class GorgReplicationTriggerExtension extends Extension
                     'Gorg\Bundle\ReplicationTriggerBundle\Trigger\TriggerToPdoMultiRaw',
                     array(
                         new Reference('logger'),
+                        new Reference('event_dispatcher'),
                         new Reference('gorg_replication_trigger_pdo_' . $entityManager),
                         $config,
                     )

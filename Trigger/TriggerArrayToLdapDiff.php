@@ -70,9 +70,13 @@ class TriggerArrayToLdapDiff extends TriggerForwarder
            $ldapEntity = null;
        }
        if(!$ldapEntity) {
+           $this->logger->info(sprintf("[LDAP Trigger] Creating a new %s entity : %s", $className, serialize($ldapEntity)));
            $ldapEntity = new $className();
            $new = true;
+       } else {
+           $this->logger->info(sprintf("[LDAP Trigger] Updating %s entity : %s", $className, serialize($ldapEntity)));
        }
+
        foreach($this->config['mapping'] as $outKey => $inKey) {
            $setter = 'set' . ucfirst($outKey);
            if(isset($entity[$inKey])) {

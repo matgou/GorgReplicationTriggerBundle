@@ -31,7 +31,8 @@ use Symfony\Component\HttpKernel\Log\LoggerInterface;
 abstract class Trigger
 {
     protected $logger;
-
+    protected $initialEntity;
+ 
     /**
      * Create a new trigger
      *
@@ -52,6 +53,7 @@ abstract class Trigger
     {
         if($event->getEntity())
         {
+            $this->initialEntity = $event->getEntity();
             $entity = $this->transform($event->getEntity(), $event->getAction());
             $this->persist($entity);
         }

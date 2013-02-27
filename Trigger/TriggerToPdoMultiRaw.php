@@ -26,56 +26,62 @@ use Symfony\Component\HttpKernel\Log\LoggerInterface;
 
 /**
  * Class to represent a Trigger
+ *
+ * config format :
+ *   triggerName:
+ *       entityManager: pdo_session1
+ *       new:    "INSERT INTO ... VALUES (:value1, :value2)
+ *       remove: "DELETE FROM ... WHERE key = :value1"
+ *       update: "UPDATE ... SET field2 = :value2 WHERE  key =  :value1"
+ *       mapping:
+ *           value1:    objectField1
+ *           value2:    objectField2
+ *
  * Author: Mathieu GOULIN <mathieu.goulin@gadz.org>
  */
-abstract class TriggerToPdo extends TriggerForwarder
+class TriggerToPdoMultiRaw extends TriggerToPdo
 {
-    protected $pdo;
-    protected $config;
-
-    public function __construct(LoggerInterface $logger, $eventDispatcher, \PDO $pdo, Array $config)
+    /**
+     * Convert object into array using mapping in configuration
+     */
+    private function objectToArray($entity)
     {
-        $this->pdo     = $pdo;
-        $this->config  = $config;
-
-        parent::__construct($logger, $eventDispatcher, $config);
-    }
-
-    private function cleanParameters($sql, Array $data) {
-        foreach ($data as $key => $value) {
-            if(!preg_match("/:$key/", $sql)) {
-                unset($data[$key]);
-            }
+        $mapping = $this->config['mapping'];
+        $returnArray = array();
+        foreach($mapping as $key => $column) {
+            $getter = 'get' . ucfirst($column);
+            $returnArray[$key] = $entity->$getter();
         }
-        return $data;
+
+        return $returnArray;
     }
 
     /**
      * {@inheritdoc}
      */
-    protected function persist($entity) 
+    protected function transform($entity, $action)
     {
-        foreach($entity as $query) {
-            $this->executeQuery($query['sql'], $query['data']);
+        $data = $this->objectToArray($entity);
+        // Test if entity exist
+        $arrayName = $this->config['arrayName'];
+        $sql = $this->config['fetch'];
+        $return = array();
+        foreach($data[$arrayName] as $value) {
+            $value = "'" . $value . "'";
+            $singleRawSql = preg_replace('/:' . $arrayName . '/', $value, $sql);
+            $dbData = $this->executeQuery($singleRawSql, $data);
+            if(!empty($dbData)) {
+                $outSql = preg_replace('/:' . $arrayName . '/', $value, $this->config['update']);
+            } else {
+                $outSql = preg_replace('/:' . $arrayName . '/', $value, $this->config['new']);
+            }
+
+            $return[] = array(
+                'sql' => $outSql,
+                'data' => $data,
+            );
         }
 
-        $trigger = new TriggerEvent($this->initialEntity, 'new');
-        foreach($this->config['target'] as $forwardEventName) {
-            $this->eventDispatcher->dispatch($forwardEventName, $trigger);
-        }
-    }
-    
-    protected function executeQuery($sql, Array $data)
-    {
-        $data = $this->cleanParameters($sql, $data);
-        $this->logger->info(sprintf('Execute query : "%s" with data "%s"', $sql, serialize($data)));
-        $sth = $this->pdo->prepare($sql);
-        $sth->execute($data);
-        if($sth->errorCode() === '00000') {
-            return $sth->fetch();
-        } else {
-            $errorInfo = $sth->errorInfo();
-            throw new \Exception(sprintf('Exceptition in pdo see log : %s', $errorInfo[2]));
-        }
+        return $return;
     }
 }
