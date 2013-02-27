@@ -70,21 +70,20 @@ class TriggerArrayToLdapDiff extends TriggerForwarder
            $ldapEntity = null;
        }
        if(!$ldapEntity) {
-           $this->logger->info(sprintf("[LDAP Trigger] Creating a new %s entity : %s", $className, serialize($ldapEntity)));
            $ldapEntity = new $className();
            $new = true;
-       } else {
-           $this->logger->info(sprintf("[LDAP Trigger] Updating %s entity : %s", $className, serialize($ldapEntity)));
        }
 
        foreach($this->config['mapping'] as $outKey => $inKey) {
            $setter = 'set' . ucfirst($outKey);
+           $this->logger->info('set : ' . $setter);
            if(isset($entity[$inKey])) {
+               $this->logger->info('value : ' . $entity[$inKey]);
                $value = $entity[$inKey];
                if(!is_array($value) && preg_match("@^(19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])@", $value)) {
                    $value = new \DateTime($value);
                }
-
+                
                $ldapEntity->$setter($value);
            }
        }
@@ -106,7 +105,7 @@ class TriggerArrayToLdapDiff extends TriggerForwarder
         foreach($this->config['target'] as $forwardEventName) {
             $this->eventDispatcher->dispatch($forwardEventName, $event);
         }
-        return $event;
 
+        return $event;
     }
 }

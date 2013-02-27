@@ -56,6 +56,27 @@ class TriggerToPdoMultiRaw extends TriggerToPdo
         return $returnArray;
     }
 
+    private function getDBColumn($sql, $data, $columnName)
+    {
+        $columnValues = array();
+        $data = $this->cleanParameters($sql, $data);
+        $this->logger->info(sprintf('Execute query : "%s" with data "%s"', $sql, serialize($data)));
+        $sth = $this->pdo->prepare($sql);
+        $sth->execute($data);
+        if($sth->errorCode() === '00000') {
+            $rawInDBData = $sth->fetchAll(\PDO::FETCH_ASSOC);
+        } else {
+            $errorInfo = $sth->errorInfo();
+            throw new \Exception(sprintf('Exceptition in pdo see log : %s', $errorInfo[2]));
+        }
+
+        foreach($rawInDBData as $dbData) {
+            $columnValues[] = $dbData[$columnName];
+        }
+
+        return $columnValues;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -66,6 +87,18 @@ class TriggerToPdoMultiRaw extends TriggerToPdo
         $arrayName = $this->config['arrayName'];
         $sql = $this->config['fetch'];
         $return = array();
+        $sqlFetchAll = preg_replace('/:' . $arrayName . '/', '"%"', $sql);
+
+        /* get data in db and delete if obsolete */
+        $dataInDB = $this->getDBColumn($sqlFetchAll, $data, $arrayName);
+        $dataToDelete = array_diff($dataInDB, $data[$arrayName]);
+        $dataTemp = $data;
+        foreach($dataToDelete as $valueToDelete) {
+            $dataTemp[$arrayName] = $valueToDelete;
+            $this->executeQuery($this->config['remove'], $dataTemp);
+        }
+
+        /* Insert or update new data in db */
         foreach($data[$arrayName] as $value) {
             $value = "'" . $value . "'";
             $singleRawSql = preg_replace('/:' . $arrayName . '/', $value, $sql);

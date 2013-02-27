@@ -41,7 +41,7 @@ abstract class TriggerToPdo extends TriggerForwarder
         parent::__construct($logger, $eventDispatcher, $config);
     }
 
-    private function cleanParameters($sql, Array $data) {
+    protected function cleanParameters($sql, Array $data) {
         foreach ($data as $key => $value) {
             if(!preg_match("/:$key/", $sql)) {
                 unset($data[$key]);
