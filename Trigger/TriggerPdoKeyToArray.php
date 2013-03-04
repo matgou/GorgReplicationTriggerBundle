@@ -46,6 +46,17 @@ class TriggerPdoKeyToArray extends TriggerForwarder
         return parent::__construct($logger, $eventDispatcher, $config);
     }
 
+    public function getData($key)
+    {
+        $keyAttributes = "key";
+        $sql = $this->config['fetch'];
+
+        $entity = array(
+            $keyAttributes => $key
+        );
+        return $this->executeQuery($sql, $entity);
+    }
+
     /**
      * Transform the entity to an acceptable form for destination
      * 
