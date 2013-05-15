@@ -91,7 +91,7 @@ class TriggerToPdoMultiRaw extends TriggerToPdo
 
         /* get data in db and delete if obsolete */
         $dataInDB = $this->getDBColumn($sqlFetchAll, $data, $arrayName);
-        $dataToDelete = array_diff($dataInDB, $data[$arrayName]);
+        $dataToDelete = array_diff($dataInDB, is_null($data[$arrayName]) ? array() : $data[$arrayName]);
         $dataTemp = $data;
         foreach($dataToDelete as $valueToDelete) {
             $dataTemp[$arrayName] = $valueToDelete;
@@ -99,7 +99,7 @@ class TriggerToPdoMultiRaw extends TriggerToPdo
         }
 
         /* Insert or update new data in db */
-        foreach($data[$arrayName] as $value) {
+        if(!empty($data[$arrayName])) foreach($data[$arrayName] as $value) {
             $value = "'" . $value . "'";
             $singleRawSql = preg_replace('/:' . $arrayName . '/', $value, $sql);
             $dbData = $this->executeQuery($singleRawSql, $data);

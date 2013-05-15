@@ -44,7 +44,7 @@ class TriggerToLdapEm extends Trigger
     /**
      * {@inheritdoc}
      */
-    protected function transform($entity, $action);
+    protected function transform($entity, $action)
     {
    // TODO 
         return $entity;

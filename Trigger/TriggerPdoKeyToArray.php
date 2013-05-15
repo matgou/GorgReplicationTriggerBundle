@@ -74,10 +74,12 @@ class TriggerPdoKeyToArray extends TriggerForwarder
     }
 
     private function cleanParameters($sql, Array $data) {
-        foreach ($data as $key => $value) {
+        foreach ($data as $key => &$value) {
             if(!preg_match("/:$key/", $sql)) {
                 unset($data[$key]);
+                continue;
             }
+            $value = $this->pdo->quote($value);
         }
         return $data;
     }
