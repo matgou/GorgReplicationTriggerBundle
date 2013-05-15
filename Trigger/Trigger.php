@@ -56,6 +56,8 @@ abstract class Trigger
             $this->initialEntity = $event->getEntity();
             $entity = $this->transform($event->getEntity(), $event->getAction());
             $this->persist($entity);
+        } else {
+            $this->logger->info(sprintf('Entity is flase, so ending workflow and not executing event !!!'));
         }
     }
 

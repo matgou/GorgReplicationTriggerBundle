@@ -77,8 +77,9 @@ class TriggerCompleteArrayWithLdap extends TriggerForwarder
      */
     protected function persist($entity)
     {
-        $event = new TriggerEvent($entity, 'new');
         foreach($this->config['target'] as $forwardEventName) {
+            $this->logger->info("forward 'TriggerEvent' to " . $forwardEventName);
+            $event = new TriggerEvent($entity, 'new');
             $this->eventDispatcher->dispatch($forwardEventName, $event);
         }
     }

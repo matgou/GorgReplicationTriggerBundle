@@ -103,6 +103,7 @@ class TriggerArrayToLdapDiff extends TriggerForwarder
         $this->entityManager->persist($entity);
         $event = new TriggerEvent($entity, 'new');
         foreach($this->config['target'] as $forwardEventName) {
+            $this->logger->info("forward 'TriggerEvent' to " . $forwardEventName);
             $this->eventDispatcher->dispatch($forwardEventName, $event);
         }
 

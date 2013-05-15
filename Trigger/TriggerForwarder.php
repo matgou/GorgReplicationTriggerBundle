@@ -67,6 +67,7 @@ class TriggerForwarder extends Trigger
     protected function persist($entity) 
     {
         foreach($this->config['target'] as $forwardEventName) {
+            $this->logger->info("forward 'TriggerEvent' to " . $forwardEventName);
             $this->eventDispatcher->dispatch($forwardEventName, $entity);
         }
     }
