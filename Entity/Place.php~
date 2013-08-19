@@ -1,0 +1,220 @@
+<?php
+/***************************************************************************
+ * Copyright (C) 1999-2012 Gadz.org                                        *
+ * http://opensource.gadz.org/                                             *
+ *                                                                         *
+ * This program is free software; you can redistribute it and/or modify    *
+ * it under the terms of the GNU General Public License as published by    *
+ * the Free Software Foundation; either version 2 of the License, or       *
+ * (at your option) any later version.                                     *
+ *                                                                         *
+ * This program is distributed in the hope that it will be useful,         *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of          *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the            *
+ * GNU General Public License for more details.                            *
+ *                                                                         *
+ * You should have received a copy of the GNU General Public License       *
+ * along with this program; if not, write to the Free Software             *
+ * Foundation, Inc.,                                                       *
+ * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA                   *
+ ***************************************************************************/
+
+namespace Gorg\Bundle\ReplicationTriggerBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * @ORM\Entity
+ * @ORM\Table(name="trigger_place")
+ */
+class Place {
+    /**
+     * @ORM\Id
+     * @ORM\Column(type="integer")
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    protected $id;
+
+    /**
+     * @ORM\Column(type="string", length=100)
+     */
+    protected $name;
+
+    /**
+     * @ORM\Column(type="text")
+     */
+    protected $description;
+
+    /**
+     * @ORM\Column(type="json_array")
+     */
+    protected $event;
+
+    /**
+     * @ORM\Column(type="string", length=100)
+     */
+    protected $completer;
+
+    /**
+     * @ORM\Column(type="string", length=100)
+     */
+    protected $type;
+
+    /**
+     * @ORM\Column(type="string", length=100, nullable = true)
+     */
+    protected $entityManager;
+
+    /**
+     * @ORM\Column(type="json_array")
+     */
+    protected $config;
+
+    /**
+     * Get id
+     *
+     * @return integer 
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set name
+     *
+     * @param string $name
+     * @return Place
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+    
+        return $this;
+    }
+
+    /**
+     * Get name
+     *
+     * @return string 
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Set description
+     *
+     * @param string $description
+     * @return Place
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
+    
+        return $this;
+    }
+
+    /**
+     * Get description
+     *
+     * @return string 
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
+     * Set event
+     *
+     * @param string $event
+     * @return Place
+     */
+    public function setEvent($event)
+    {
+        $this->event = $event;
+    
+        return $this;
+    }
+
+    /**
+     * Get event
+     *
+     * @return string 
+     */
+    public function getEvent()
+    {
+        return $this->event;
+    }
+
+    /**
+     * Set type
+     *
+     * @param string $type
+     * @return Place
+     */
+    public function setType($type)
+    {
+        $this->type = $type;
+    
+        return $this;
+    }
+
+    /**
+     * Get type
+     *
+     * @return string 
+     */
+    public function getType()
+    {
+        return $this->type;
+    }
+
+    /**
+     * Set entityManager
+     *
+     * @param string $entityManager
+     * @return Place
+     */
+    public function setEntityManager($entityManager)
+    {
+        $this->entityManager = $entityManager;
+    
+        return $this;
+    }
+
+    /**
+     * Get entityManager
+     *
+     * @return string 
+     */
+    public function getEntityManager()
+    {
+        return $this->entityManager;
+    }
+
+    /**
+     * Set config
+     *
+     * @param array $config
+     * @return Place
+     */
+    public function setConfig($config)
+    {
+        $this->config = $config;
+    
+        return $this;
+    }
+
+    /**
+     * Get config
+     *
+     * @return array 
+     */
+    public function getConfig()
+    {
+        return $this->config;
+    }
+}

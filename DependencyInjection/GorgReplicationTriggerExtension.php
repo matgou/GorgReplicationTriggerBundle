@@ -34,15 +34,20 @@ class GorgReplicationTriggerExtension extends Extension
                 array($pdoConfig['dsn'], $pdoConfig['user'], $pdoConfig['password'])
             ));
         }
+        $master = $config['pdo_master'];
+        /* Query the database to obtain trigger list */
+        $masterDB = new \PDO($master['dsn'], $master['user'], $master['password']);
+        $stmt = $masterDB->prepare("select name, type, config, event, completer, entityManager,	config FROM trigger_place");
+        $stmt->execute();
 
-        foreach($config['trigger'] as $triggerName => $triggerConfig) {
+        while($triggerConfig = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+            $triggerName   = $triggerConfig['name'];
             $type          = $triggerConfig['type'];
-            $config        = $triggerConfig['config'];
-            $onChange      = $triggerConfig['event'];
+            $config        = json_decode($triggerConfig['config'], true);
+            $onChange      = json_decode($triggerConfig['event'], true);
             if(isset($triggerConfig['completer'])) {
                 $completer = $triggerConfig['completer'];
             }
-
             if(strcmp($type,"pdoSingleRaw")==0) {
                 $entityManager = $triggerConfig['entityManager'];
                 $def = new Definition(
