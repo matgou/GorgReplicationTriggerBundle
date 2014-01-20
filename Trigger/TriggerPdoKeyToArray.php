@@ -79,7 +79,7 @@ class TriggerPdoKeyToArray extends TriggerForwarder
                 unset($data[$key]);
                 continue;
             }
-            $value = $this->pdo->quote($value);
+            $value = $value;
         }
         return $data;
     }
@@ -92,7 +92,10 @@ class TriggerPdoKeyToArray extends TriggerForwarder
         $sth = $this->pdo->prepare($sql);
         $sth->execute($data);
         if($sth->errorCode() === '00000') {
-            return $sth->fetch(\PDO::FETCH_ASSOC);
+            $object = $sth->fetch(\PDO::FETCH_ASSOC);
+            $this->logger->info(sprintf('Fetch %s object with pdo', count($object)));
+            $this->logger->info(sprintf('object %s', json_encode($object)));
+            return $object;
         } else {
             $errorInfo = $sth->errorInfo();
             throw new \Exception(sprintf('Exceptition in pdo see log : %s', $errorInfo[2]));

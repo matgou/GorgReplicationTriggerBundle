@@ -60,9 +60,11 @@ abstract class TriggerToPdo extends TriggerForwarder
         }
 
         $trigger = new TriggerEvent($this->initialEntity, 'new');
-        foreach($this->config['target'] as $forwardEventName) {
-            $this->logger->info("forward 'TriggerEvent' to " . $forwardEventName);
-            $this->eventDispatcher->dispatch($forwardEventName, $trigger);
+        if(isset($this->config['target'])) {
+            foreach($this->config['target'] as $forwardEventName) {
+                $this->logger->info("forward 'TriggerEvent' to " . $forwardEventName);
+                $this->eventDispatcher->dispatch($forwardEventName, $trigger);
+            }
         }
     }
     
