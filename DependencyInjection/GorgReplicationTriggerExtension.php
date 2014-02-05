@@ -89,6 +89,20 @@ class GorgReplicationTriggerExtension extends Extension
 
                 $def->addTag('kernel.event_listener', array('event' => $onChange, 'method' => "onChange"));
                 $container->setDefinition('gorg_replication_trigger_' . $triggerName, $def);
+            } elseif(strcmp($type, "ldapKeyToArray") == 0) {
+                $def = new Definition(
+                    'Gorg\Bundle\ReplicationTriggerBundle\Trigger\TriggerLdapKeyToArray',
+                    array(
+                        new Reference('logger'),
+                        new Reference('event_dispatcher'),
+                        new Reference('gorg_ldap_orm.entity_manager'),
+                        $config,
+                    )
+                );
+
+                $def->addTag('kernel.event_listener', array('event' => $onChange, 'method' => "onChange"));
+                $definitionInContainer = $container->setDefinition('gorg_replication_trigger_' . $triggerName, $def);
+
             } elseif(strcmp($type, "arrayToLdapDiff") == 0) {
                 $def = new Definition(
                     'Gorg\Bundle\ReplicationTriggerBundle\Trigger\TriggerArrayToLdapDiff',

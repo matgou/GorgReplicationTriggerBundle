@@ -45,6 +45,12 @@ abstract class TriggerToPdo extends TriggerForwarder
         foreach ($data as $key => $value) {
             if(!preg_match("/:$key/", $sql)) {
                 unset($data[$key]);
+            } elseif(is_array($data[$key])) {
+                if(is_string($data[$key][0])) {
+                    $data[$key] = $data[$key][0];
+                } else {
+                    unset($data[$key]);
+                }
             }
         }
         return $data;
